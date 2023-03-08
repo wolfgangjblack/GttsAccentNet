@@ -3,8 +3,6 @@ import os
 import tensorflow_io as tfio
 import tensorflow as tf
 
-from itertools import groupby
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -234,7 +232,7 @@ def plot_spectrogram_subplots(word:str, labels:int, data_dir:str, frames:str, sp
     plt.tight_layout()
     for i in range(len(labels)):
         temp_dir = data_dir+labels[i]+'/'
-        temp_file_list = tf.data.Dataset.list_files(temp_dir+word+' .wav')
+        temp_file_list = tf.data.Dataset.list_files(temp_dir+word+'.wav')
         temp = tf.data.Dataset.zip((temp_file_list, tf.data.Dataset.from_tensor_slices(tf.ones(len(temp_file_list))*i)))
         temp_wav, temp_label = temp.as_numpy_iterator().next()
         if spec_type == 'spec':
@@ -242,11 +240,12 @@ def plot_spectrogram_subplots(word:str, labels:int, data_dir:str, frames:str, sp
         else:
             wav_dict[temp_label], _ = wav_to_mels_spectrogram(temp_wav, temp_label, frames)
         ax = plt.subplot(len(labels), 1, i+1)
-        ax.set_title(labels[i]+word+' spectrogram')
+        ax.set_title(labels[i]+" "+word+' spectrogram')
         plt.imshow(tf.transpose(wav_dict[temp_label])[0])
     
-    fig.savefig(savepath+word+'_'+'_'+spec_type+'_subplot.png')
+    fig.savefig(savepath+word+'_'+spec_type+'_subplot.png')
     plt.close()
+    return 
 
 def generate_tf_dataset(data_dir:str, class_labels:list, frames:int, spec_type = 'spec'):
     for i in range(len(class_labels)):
