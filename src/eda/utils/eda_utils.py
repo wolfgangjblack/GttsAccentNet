@@ -5,6 +5,7 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 import seaborn as sns
 import pandas as pd
 
@@ -68,8 +69,11 @@ def get_descriptive_class_metrics(data_dir, label):
     also outputs the mean, min, and max length associated with the class"""
     lengths = []
     for file in os.listdir(data_dir+label+'/'):
-        tensor_wave = load_wav_output_mono_channel_file(data_dir+label+'/'+file)
-        lengths.append(len(tensor_wave))
+        if ".wav" not in file:
+            continue
+        else:
+            tensor_wave = load_wav_output_mono_channel_file(data_dir+label+'/'+file)
+            lengths.append(len(tensor_wave))
     
     mean = tf.math.reduce_mean(lengths).numpy()
     mini = tf.math.reduce_min(lengths).numpy()
@@ -120,7 +124,8 @@ def get_frames_from_quantile(labels:list, quantile:int, sample_out: int, data_di
     """
     As we process data for model training/testing/inference we need to determine the max frames to standardize the input date.
     This should be roughly informed by get_lengths_subplots so the users can see the lengths of the class wavs plotted together, 
-    as well as the boxplot"""
+    as well as the boxplot
+    """
     lengths = {}
     for label in labels:
         lengths[label], _, _, _ = get_descriptive_class_metrics(data_dir, label)
@@ -142,6 +147,13 @@ def save_native_sample_rates(labels:list, data_dir:str, savepath = './artifacts/
     return
 
 def wav_to_spectrogram(file_path:str, label:int, frames: int):
+    '''
+    This function reads in a signle file path, a label, and the desired output max frame count to produce a spectrogram. This will be used in 
+    tf.data.Dataset.map() to convert filepaths into spectrograms after the data has been groupped together
+
+    Note: frames here should be found using get_frames_from_quantile, and should cover at least 80% of the files lengths
+        for this work, 19520 appears to be the correct number from EDA 
+    '''
     wav = load_wav_output_mono_channel_file(file_path)
     
     ##Select as much wav as fills frames, if len(wav) < frames, this will be less than frames and will need padding
@@ -189,6 +201,17 @@ def power_to_db(S, amin=1e-16, top_db=80.0):
     return log_spec
 
 def wav_to_mels_spectrogram(file_path:str, label:int, frames:int):
+    '''
+    This function reads in a signle file path, a label, and the desired output max frame count to produce a spectrogram. This will be used in 
+    tf.data.Dataset.map() to convert filepaths into mels spectrograms after the data has been groupped together
+
+    A Mels Spectrogram is a variant of the spectrogram that is obtained by applying a mel scale to the frequency axis. 
+    The mel scale is a perceptual scale of pitches that is based on how humans perceive sound. Mel spectrograms are useful 
+    because they allow the representation of audio signals in a way that is more aligned with human perception of sound.
+
+    Note: frames here should be found using get_frames_from_quantile, and should cover at least 80% of the files lengths
+        for this work, 19520 appears to be the correct number from EDA 
+    '''
     wav = load_wav_output_mono_channel_file(file_path)
     
     ##Select as much wav as fills frames, if len(wav) < frames, this will be less than frames and will need padding
@@ -227,13 +250,17 @@ def wav_to_mels_spectrogram(file_path:str, label:int, frames:int):
     return log_magnitude_mel_spectrograms, label
 
 def plot_spectrogram_subplots(word:str, labels:int, data_dir:str, frames:str, spec_type = 'spec', savepath = './artifacts/'):
+    '''
+    This function reads in a word and generates a subplot artifact showing the different labels spectrographs of the word provided
+    '''
     wav_dict ={}
     fig = plt.figure(figsize = (30, 25))
     plt.tight_layout()
     for i in range(len(labels)):
         temp_dir = data_dir+labels[i]+'/'
         temp_file_list = tf.data.Dataset.list_files(temp_dir+word+'.wav')
-        temp = tf.data.Dataset.zip((temp_file_list, tf.data.Dataset.from_tensor_slices(tf.ones(len(temp_file_list))*i)))
+        temp = tf.data.Dataset.zip((temp_file_list,
+            tf.data.Dataset.from_tensor_slices(tf.one_hot(np.ones(len(temp_file_list))*i, len(labels)))))
         temp_wav, temp_label = temp.as_numpy_iterator().next()
         if spec_type == 'spec':
             wav_dict[temp_label], _ = wav_to_spectrogram(temp_wav, temp_label, frames)            
@@ -248,21 +275,32 @@ def plot_spectrogram_subplots(word:str, labels:int, data_dir:str, frames:str, sp
     return 
 
 def generate_tf_dataset(data_dir:str, class_labels:list, frames:int, spec_type = 'spec'):
+    '''
+    Prepares a tf dataset object for use in a model. This function provides a data pipeline
+    generating a dataset object of file paths, then using the Dataset.map() function to convert
+    file paths to spectrograms (represented in tensors) and labels. '''
+
     for i in range(len(class_labels)):
         temp_dir = data_dir+class_labels[i]+'/'
         temp_file_list = tf.data.Dataset.list_files(temp_dir+'*.wav')
-        temp = tf.data.Dataset.zip((temp_file_list, tf.data.Dataset.from_tensor_slices(tf.ones(len(temp_file_list))*i)))
+        temp_labels =  tf.data.Dataset.from_tensor_slices(tf.ones(len(temp_file_list))*i)
+        temp = tf.data.Dataset.zip((temp_file_list, temp_labels))
+
         if i == 0:
             data = temp
         else:
             data = data.concatenate(temp)
+
+    data = data.shuffle(13333, seed = 1234)
     frames = tf.constant(frames, dtype=tf.int64)
+
     if spec_type == 'spec':
         data = data.map(lambda filepath, label: wav_to_spectrogram(filepath, label, frames))
     else:
         data = data.map(lambda filepath, label: wav_to_mels_spectrogram(filepath, label, frames))
-    data = data.shuffle(3)
-    data = data.cache()
+
     data = data.batch(16)
-    data = data.prefetch(10)
+    data = data.cache()
+    data = data.prefetch(1)
+
     return data
