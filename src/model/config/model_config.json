@@ -1,0 +1,1 @@
+{"data_dir": "../../data", "artifacts_dir": "./artifacts", "model_dir": "./artifacts/models/", "test_data_dir": "./artifacts/test_data/", "frames": 19520, "model_type": "shallow_cnn", "spec_type": "spec", "batch_size": 16, "split": 0.7, "base_learning_rate": 0.001, "epochs": 25}

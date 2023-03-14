@@ -1,6 +1,7 @@
 ##This script is used to generate a .json, which acts as a guide to model.py
 
 import json
+from utils.model_utils import (write_json)
 
 config = {}
 ##Specify where the data is for model training
@@ -21,9 +22,11 @@ config['model_type'] = 'shallow_cnn'
 config['spec_type'] = 'spec'
 ##Specify a batch size for training, 16 is a decent size. 
 config['batch_size'] = 16
+##Specify a split for train/test+val. Test and val will be split down the middle...
+config['split'] = 0.7
 ##specify base learning rate for adam
 config['base_learning_rate'] = 0.001
-##
+##How many Epochs to train the model for
 config['epochs'] = 25
 
-json_data = json.dumps(config)
+write_json('config', 'model_config.json', config)

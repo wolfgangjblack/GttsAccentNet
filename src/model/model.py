@@ -10,6 +10,11 @@ from utils.model_utils import (check_artifacts_dir,
                              save_model_performance
                              )
 
+##load config, if this DNE - User must first run generate_model_config.py
+#this was done intentionally so user can meaningfully set config parameters
+f = open('config/model_config.json')
+config = json.load(f)
+
 ##load from config
 data_dir = config['data_dir'] 
 artifacts_dir = config['artifacts_dir'] 
@@ -21,6 +26,7 @@ batch_size = config['batch_size']
 spec_type = config['spec_type']
 base_learning_rate = config['base_learning_rate']
 epochs = config['epochs']
+split = config['split']
 
 ##Check if artifact/model dir exist, and if they don't - generate them
 check_artifacts_dir(artifacts_dir)
@@ -33,10 +39,10 @@ class_labels = [i for i in os.listdir(data_dir) if '_' not in i]
 data = generate_tf_dataset(data_dir, class_labels, frames, batch_size, spec_type)
 
 ##This splits the dataset into test/train
-split = int(len(data)*0.7)+1
+split_count = int(len(data)*split)+1
 
-train = data.take(split)
-test_and_val = data.skip(split).take(len(data)-split)
+train = data.take(split_count)
+test_and_val = data.skip(split_count).take(len(data)-split_count)
 
 input_shape = get_input_shape(train)
 

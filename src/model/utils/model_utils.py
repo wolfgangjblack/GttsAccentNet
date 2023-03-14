@@ -1,4 +1,5 @@
 import os
+import json
 
 import tensorflow_io as tfio
 import tensorflow as tf
@@ -227,7 +228,7 @@ def build_transfer_inception_model(input_shape, class_labels):
     
 def build_and_compile_model(input_shape: tuple, class_labels: list, model_type: str, base_learning_rate: int):
 
-    if model_type = 'shallow_cnn':
+    if model_type == 'shallow_cnn':
         model = build_shallow_cnn(input_shape, class_labels)
     else:
         model = build_transfer_inception_model(input_shape, class_labels)
@@ -261,3 +262,13 @@ def save_model_performance(history, model_type:str, savepath = './artifacts/'):
     fig.savefig(savepath+model_type+'_training_metrics.png')
 
     return
+
+def write_json(target_path, target_file, data):
+    if not os.path.exists(target_path):
+        try:
+            os.makedirs(target_path)
+        except Exception as e:
+            print(e)
+            raise
+    with open(os.path.join(target_path, target_file), 'w') as f:
+        json.dump(data, f)
