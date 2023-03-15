@@ -1,1 +1,3 @@
 ./data/*
+./src/model/artifacts/models/*
+./src/model/artifacts/test_data/*
