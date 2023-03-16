@@ -30,7 +30,19 @@ Finally inference is done in /src/inference.py relying on /src/generate_inferenc
 ## Results
 During training, both models achieved an accuracy of around 80% on the validation data. However, when evaluated on a hold out dataset, the transfer learned CNN outperformed the shallow custom CNN as can be seen on the training metrics show below.
 
+![alt text](https://github.com/wolfgangjblack/synthetic_accent_module/blob/main/src/model/artifacts/shallow_cnn_training_metrics.png)
 
+Above we can see that the shallow CNN ends its training with an accuracy and validation accuracy of around 0.8, however we can see in the inference confusion matrix that the shallow CNN has trouble predicting on the canadian english accent. 
+
+![alt text](https://github.com/wolfgangjblack/synthetic_accent_module/blob/main/src/artifacts/shallow_cnn_confusion_matrix.jpg)
+
+The transfer learned model performed similary during training in that the training accuracy reached 0.8, however its validation accuracy was much worse. 
+![alt text](https://github.com/wolfgangjblack/synthetic_accent_module/blob/main/src/model/artifacts/transfer_inception_training_metrics.png)
+
+Despite this, the transfer learning model actually generalizes MUCH better and can score decently on each class
+![alt text](https://github.com/wolfgangjblack/synthetic_accent_module/blob/main/src/artifacts/inception_confusion_matrix.jpg)
+
+Even though the model does perform better more generally, both models struggle to predict on the sythetic canadian accent. **To address this, I recommend seeding in real accents instead of synthetic accents**. 
 
 ## Conclusion
-In this project, we generated synthetic audio data using gTTS and used it to train and evaluate two CNNs for word classification. Our results suggest that transfer learning can improve the performance of the CNN for this task. This code can be used as a starting point for other projects that require synthetic data generation and classification.
+In this project, we generated synthetic audio data using gTTS and used it to train and evaluate two CNNs for word classification. Our results suggest that transfer learning can improve the performance of the CNN for this task. This code can be used as a starting point for other projects that require synthetic data generation and classification - as well as the start of a transcripting software which works to recognize individual accents to better tackle fair and accurate transcription. 
