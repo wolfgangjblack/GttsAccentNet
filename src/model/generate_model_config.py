@@ -5,9 +5,9 @@ from utils.model_utils import (write_json)
 
 config = {}
 ##Specify where the data is for model training
-config['data_dir'] = '../../data'
+config['data_dir'] = '../../data/'
 ##Specify where to save model training artifacts
-config['artifacts_dir'] = './artifacts'
+config['artifacts_dir'] = './artifacts/'
 ##Specify where to save model after training
 config['model_dir'] = './artifacts/models/'
 ##Specify where to save test data (a ts.data.Dataset object) - note: this is during model training and used in src/main.py to simulate inference
