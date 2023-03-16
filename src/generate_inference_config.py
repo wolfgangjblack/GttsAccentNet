@@ -11,7 +11,7 @@ config['test_data_dir'] = './model/artifacts/test_data'
 ##Specify where to save model inference artifacts
 config['artifacts_dir'] = './artifacts/'
 ##Specify where to model is stored, so it can be loaded for inference
-config['model_dir'] = './amodel/artifacts/models/'
+config['model_dir'] = './model/artifacts/models/'
 ##Specify type of model - this can either be shallow_cnn or inception. The specified model will be used for inference
 config['model_type'] = 'shallow_cnn'
 #config['model_type'] = 'inception'
