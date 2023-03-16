@@ -129,7 +129,7 @@ def get_frames_from_quantile(labels:list, quantile:int, sample_out: int, data_di
     lengths = {}
     for label in labels:
         lengths[label], _, _, _ = get_descriptive_class_metrics(data_dir, label)
-    return round(np.max(pd.DataFrame(lengths).quantile(.8))/sample_out, 2)*sample_out
+    return int(round(np.max(pd.DataFrame(lengths).quantile(.8))/sample_out, 2)*sample_out)
 
 def save_frames_to_text(frames:int, filename: str, artifacts_dir: str):
     """
@@ -137,7 +137,7 @@ def save_frames_to_text(frames:int, filename: str, artifacts_dir: str):
     As such, this will save out the result for reference when building the model config
     """
     textfile = open(artifacts_dir+filename+'.txt', 'w')
-    textfile.write(frames)
+    textfile.write(str(frames))
     textfile.close()
     return
 
@@ -270,7 +270,7 @@ def plot_spectrogram_subplots(word:str, labels:int, data_dir:str, frames:str, sp
         temp_dir = data_dir+labels[i]+'/'
         temp_file_list = tf.data.Dataset.list_files(temp_dir+word+'.wav')
         temp = tf.data.Dataset.zip((temp_file_list,
-            tf.data.Dataset.from_tensor_slices(tf.one_hot(np.ones(len(temp_file_list))*i, len(labels)))))
+            tf.data.Dataset.from_tensor_slices(tf.ones(len(temp_file_list))*i)))
         temp_wav, temp_label = temp.as_numpy_iterator().next()
         if spec_type == 'spec':
             wav_dict[temp_label], _ = wav_to_spectrogram(temp_wav, temp_label, frames)            
