@@ -131,6 +131,16 @@ def get_frames_from_quantile(labels:list, quantile:int, sample_out: int, data_di
         lengths[label], _, _, _ = get_descriptive_class_metrics(data_dir, label)
     return round(np.max(pd.DataFrame(lengths).quantile(.8))/sample_out, 2)*sample_out
 
+def save_frames_to_text(frames:int, filename: str, artifacts_dir: str):
+    """
+    get_frames_from_quantile is a large function that takes some time run on smaller systems. 
+    As such, this will save out the result for reference when building the model config
+    """
+    textfile = open(artifacts_dir+filename+'.txt', 'w')
+    textfile.write(frames)
+    textfile.close()
+    return
+
 def save_native_sample_rates(labels:list, data_dir:str, savepath = './artifacts/', filename = 'wav_native_sample_rates'):
     sample_dict = {}
     for label in labels:    

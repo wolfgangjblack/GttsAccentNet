@@ -1,11 +1,11 @@
 
 import os
-from utils.eda_utils import (check_artifacts_dir, get_frames_from_quantile, plot_ex_wavs, plot_spectrogram_subplots, 
-get_lengths_subplots, save_native_sample_rates)
+from utils.eda_utils import (check_artifacts_dir, get_frames_from_quantile, save_frames_to_text, 
+    plot_ex_wavs, plot_spectrogram_subplots, get_lengths_subplots, save_native_sample_rates)
 
 data_dir = '../../data/'
-
-check_artifacts_dir()
+artifacts_dir = './artifacts/'
+check_artifacts_dir(artifacts_dir)
 
 class_labels = [i for i in os.listdir(data_dir) if '_' not in i]
 
@@ -13,6 +13,7 @@ class_labels = [i for i in os.listdir(data_dir) if '_' not in i]
 ##max 80% quartile from the lengths of all the audio files across the class
 print('\n\ngetting frames - this may take a moment\n\n')
 frames = get_frames_from_quantile(class_labels, 0.8, 16000, data_dir)
+save_frames_to_text(frames, "quant_0.8_suggested_frames", artifacts_dir)
 
 ##Plot a few words waveforms and spectrograms
 print('\n\nsaving word plots\n\n')
